@@ -399,6 +399,37 @@ void get(char* table) {
 // Make sure to avoid memory leaks by freeing any allocated memory
 // inside a struct (char*) before freeing the struct pointer
 void exitProgram() {
+	for(int i; i < languageMeta.maxCount; i++)
+	{
+		free((programmingLanguages + i)->language);
+		free((programmingLanguages + i)->creator);
+		free((programmingLanguages + i)->paradigm);
+		free(programmingLanguages + i);
+	}
+	free(programmingLanguages);
+	//free(languageMeta);
+
+	for(int i; i < osMeta.maxCount; i++)
+	{
+		free((operatingSystems + i)->name);
+		free((operatingSystems + i)->developer);
+		free((operatingSystems + i)->kernelType);
+		free(operatingSystems + i);
+	}
+	free(operatingSystems);
+	//free(osMeta);
+
+	for(int i; i < dbMeta.maxCount; i++)
+	{
+		free((databases + i)->name);
+		free((databases + i)->type);
+		free((databases + i)->developer);
+		free(databases + i);
+	}
+	free(databases);
+	//free(dbMeta);
+
+	
 }
 
 // this code is responsible for parsing the user's
