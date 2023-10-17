@@ -62,9 +62,9 @@ os_t* operatingSystems;
 db_t* databases;
 
 // step 4: declare 3 metadata structs, one for each table
-meta_t languageMeta;
-meta_t osMeta;
-meta_t dbMeta;
+meta_t* languageMeta;
+meta_t* osMeta;
+meta_t* dbMeta;
 
 // step 5: jump to L167
 
@@ -111,19 +111,24 @@ void splitInput(char* input, char** args, int* arg_count) {
 void setup(char* table, int numRows) {
 
 	if(strcmp(table, "programmingLanguages")  ==  0){
-		programmingLanguages = calloc(numRows, sizeof(language_t));
-		languageMeta.maxCount = numRows;
+		programmingLanguages = (language_t*)calloc(numRows, sizeof(language_t));
+		languageMeta = (meta_t*)malloc(sizeof(meta_t));
+		languageMeta->maxCount = numRows;
 
 	}
 
 	else if(strcmp(table, "operatingSystems") == 0 ){
-		operatingSystems = calloc(numRows, sizeof(os_t));
-		osMeta.maxCount = numRows;
+		operatingSystems = (os_t*)calloc(numRows, sizeof(os_t));
+		osMeta = (meta_t*)malloc(sizeof(meta_t));
+		osMeta->maxCount = numRows;
+
 	}
 	
 	else if(strcmp(table, "databases") ==0){ 
-		databases = calloc(numRows, sizeof(db_t));
-		dbMeta.maxCount = numRows;
+		databases = (db_t*)calloc(numRows, sizeof(db_t));
+		dbMeta = (meta_t*)malloc(sizeof(meta_t));
+		dbMeta->maxCount = numRows;
+		
 	}
 	else { return;}
 	
@@ -140,24 +145,28 @@ void setup(char* table, int numRows) {
 // autograder print for insufficient capacity:
 // fprintf(stderr, "cannot insert due to insufficient capacity.\n");
 void insert(char** args) {
-	char* table = strdup(args[1]);	
+	char* table = strdup(args[1]);
+	printf("%s", table);
+	printf("%s","\n");
+	
 	// DO NOT TOUCH THIS PRINT
 	// REQUIRED FOR AUTOGRADER
 	if(strcmp(table, "programmingLanguages")  ==  0){
-		if(languageMeta.count == languageMeta.maxCount){ 
+		if(languageMeta->count == languageMeta->maxCount){ 
 			printf("%s", "cannot insert due to insufficent space.\n");
 			return;
 		}
-		programmingLanguages[languageMeta.nextIndex].id = atoi(args[2]);
-		(programmingLanguages+languageMeta.nextIndex)->language = strdup(args[3]);
-		programmingLanguages[languageMeta.nextIndex].year = atoi(args[4]);
-		(programmingLanguages+languageMeta.nextIndex)->creator =  strdup(args[5]);
-		(programmingLanguages+languageMeta.nextIndex)->paradigm = strdup(args[6]);
-		programmingLanguages[languageMeta.nextIndex].popularityIndex = atof(args[7]);
-		programmingLanguages[languageMeta.nextIndex].isDeleted = 0; 
+		((*(programmingLanguages+(languageMeta->nextIndex))).id) = atoi(args[2]);
+		((*(programmingLanguages+(languageMeta->nextIndex))).language)= strdup(args[3]);
+		programmingLanguages[languageMeta->nextIndex].year = atoi(args[4]);
+		((*(programmingLanguages+languageMeta->nextIndex)).creator)=  strdup(args[5]);
+		((*(programmingLanguages+languageMeta->nextIndex)).paradigm)= strdup(args[6]);
+		programmingLanguages[languageMeta->nextIndex].popularityIndex = atof(args[7]);
+		programmingLanguages[languageMeta->nextIndex].isDeleted = 0; 
 
-		languageMeta.count++;
-		languageMeta.nextIndex++;
+		languageMeta->count++;
+		languageMeta->nextIndex++;
+	
 	}
 
 	else if(strcmp(table, "operatingSystems") == 0){
@@ -166,10 +175,10 @@ void insert(char** args) {
 			return;
 		}
 		operatingSystems[osMeta.nextIndex].id = atoi(args[2]);
-		(operatingSystems+osMeta.nextIndex)->name = strdup(args[3]);
+		operatingSystems[osMeta.nextIndex].name = strdup(args[3]);
 		operatingSystems[osMeta.nextIndex].year = atoi(args[4]);
-		(operatingSystems+osMeta.nextIndex)->developer = strdup(args[5]);
-		(operatingSystems+osMeta.nextIndex)->kernelType = strdup(args[6]);
+		operatingSystems[osMeta.nextIndex].developer = strdup(args[5]);
+		operatingSystems[osMeta.nextIndex].kernelType = strdup(args[6]);
 		operatingSystems[osMeta.nextIndex].isDeleted = 0;
 		osMeta.count++;
 		osMeta.nextIndex++; 
@@ -181,16 +190,16 @@ void insert(char** args) {
 			return;
 		}
 		databases[dbMeta.nextIndex].id = atoi(args[2]);
-		(databases+dbMeta.nextIndex)->name = strdup(args[3]);
+		databases[dbMeta.nextIndex].name = strdup(args[3]);
 		databases[dbMeta.nextIndex].year = atoi(args[4]);
-		(databases+dbMeta.nextIndex)->type = strdup(args[5]);
-		(databases+dbMeta.nextIndex)->developer = strdup(args[6]);
+		databases[dbMeta.nextIndex].type = strdup(args[5]);
+		databases[dbMeta.nextIndex].developer = strdup(args[6]);
 		databases[dbMeta.nextIndex].isDeleted = 0;
 		dbMeta.count++;
 		dbMeta.nextIndex++; 
 	}
 	else {  printf("%s","no match.\n"); return;}
-	free(table);
+
 	printf("insert complete\n");
 }
 
@@ -209,6 +218,7 @@ void delete(char* table, int id) {
 			if(programmingLanguages[i].id == id)
 			{
 				programmingLanguages[i].isDeleted = 1;
+				break;
 			}
 		}
 	}
@@ -219,6 +229,7 @@ void delete(char* table, int id) {
 			if(operatingSystems[i].id == id)
 			{
 				operatingSystems[i].isDeleted = 1;
+				break;
 			}
 		}
 
@@ -231,6 +242,7 @@ void delete(char* table, int id) {
 			if(databases[i].id == id)
 			{
 				databases[i].isDeleted = 1;
+				break;
 			}
 		}
 
@@ -250,7 +262,7 @@ void delete(char* table, int id) {
 // !!!NOTE: The structs store pointers. Make sure to free any allocated
 // memory before overwriting it!!!
 void modify(char** args) {
-	char* table = strdup(args[1]);
+	char* table = args[1];
 	int id = atoi(args[2]);
 
 	// DO NOT TOUCH THIS PRINT
@@ -261,31 +273,31 @@ if(strcmp(table, "programmingLanguages")  ==  0){
 		{
 			if(programmingLanguages[i].id == id)
 			{
-				free((programmingLanguages+i)->language);
-				free((programmingLanguages+i)->creator);
-				free((programmingLanguages+i)->paradigm);
-
 				programmingLanguages[i].id = atoi(args[3]);
-				(programmingLanguages+i)->language = strdup(args[4]);
+				free(programmingLanguages[i].language);
+				programmingLanguages[i].language = strdup(args[4]);
 				programmingLanguages[i].year = atoi(args[5]);
-				(programmingLanguages+i)->creator = strdup(args[6]);
-				(programmingLanguages+i)->paradigm = strdup(args[7]);
+				free(programmingLanguages[i].creator);
+				programmingLanguages[i].creator = strdup(args[6]);
+				free(programmingLanguages[i].paradigm);
+				programmingLanguages[i].paradigm = strdup(args[7]);
 				programmingLanguages[i].popularityIndex = atof(args[8]);
+				break;
 			}
 	}
 }
 	else if(strcmp(table, "operatingSystems") == 0){
 		for(int i = 0; i < osMeta.count; i++){
 			if(operatingSystems[i].id == id){
-				free((operatingSystems+i)->name);
-				free((operatingSystems+i)->developer);
-				free((operatingSystems+i)->kernelType);
-
 				operatingSystems[i].id = atoi(args[3]);
-				(operatingSystems+i)->name = strdup(args[4]);
+				free(operatingSystems[i].name);
+				operatingSystems[i].name = strdup(args[4]);
 				operatingSystems[i].year = atoi(args[5]);
-				(operatingSystems+i)->developer = strdup(args[6]);
-				(operatingSystems+i)->kernelType = strdup(args[7]);
+				free(operatingSystems[i].developer);
+				operatingSystems[i].developer = strdup(args[6]);
+				free(operatingSystems[i].kernelType);
+				operatingSystems[i].kernelType = strdup(args[7]);
+				break;
 			}
 		}
 
@@ -294,21 +306,22 @@ if(strcmp(table, "programmingLanguages")  ==  0){
 	else if(strcmp(table, "databases") == 0){ 
 		for(int i = 0; i < dbMeta.count; i++){
 			if(databases[i].id == id){
-				free((databases+i)->name);
-				free((databases+i)->type);
-				free((databases+i)->developer);
-
 				databases[i].id = atoi(args[3]);
-				(databases+i)->name = strdup(args[4]);
+				free(databases[i].name);
+				databases[i].name = strdup(args[4]);
 				databases[i].year = atoi(args[5]);
-				(databases+i)->type = strdup(args[6]);
-				(databases+i)->developer = strdup(args[7]);
+				free(databases[i].type);
+				databases[i].type = strdup(args[6]);
+				free(databases[i].developer);
+				databases[i].developer = strdup(args[7]);
+				break;
 			}
 		}
 
+
 	}
 	else {  printf("%s","no match.\n"); return;}
-	free(table);
+
 	printf("modify complete\n");
 }
 
@@ -328,13 +341,13 @@ void get(char* table) {
 			{
 				printf("%d", programmingLanguages[i].id);
 				printf(",");
-				printf("%s",(programmingLanguages+i)->language);
+				printf("%s",programmingLanguages[i].language);
 				printf(",");
 				printf("%d", programmingLanguages[i].year);
 				printf(",");
-				printf("%s",(programmingLanguages+i)->creator);
+				printf("%s",programmingLanguages[i].creator);
 				printf(",");
-				printf("%s",(programmingLanguages+i)->paradigm);
+				printf("%s",programmingLanguages[i].paradigm);
 				printf(",");
 				printf("%lf", programmingLanguages[i].popularityIndex);
 				printf("\n");
@@ -350,14 +363,14 @@ void get(char* table) {
 			{
 				printf("%d", operatingSystems[i].id);
 				printf(",");
-				printf("%s",(operatingSystems+i)->name);
+				printf("%s",operatingSystems[i].name);
 				printf(",");
 				printf("%d", operatingSystems[i].year);
 				printf(",");
-				printf("%s",(operatingSystems+i)->developer);
+				printf("%s",operatingSystems[i].developer);
 				printf(",");
-				printf("%s",(operatingSystems+i)->kernelType);
-				printf("\n");
+				printf("%s",operatingSystems[i].kernelType);
+				printf("/n");
 	
 			}
 		}
@@ -371,13 +384,13 @@ void get(char* table) {
 			{
 				printf("%d", databases[i].id);
 				printf(",");
-				printf("%s",(databases+i)->name);
+				printf("%s",databases[i].name);
 				printf(",");
 				printf("%d", databases[i].year);
 				printf(",");
-				printf("%s",(databases+i)->type);
-				printf("%s",(databases+i)->developer);
-				printf("\n");
+				printf("%s",databases[i].type);
+				printf("%s",databases[i].developer);
+				printf("/n");
 	
 			}
 		}
@@ -391,37 +404,37 @@ void get(char* table) {
 // Make sure to avoid memory leaks by freeing any allocated memory
 // inside a struct (char*) before freeing the struct pointer
 void exitProgram() {
-	if(languageMeta.count>0){
-	for(int i = 0; i < languageMeta.maxCount; i++)
+	for(int i; i < languageMeta.maxCount; i++)
 	{
-		free((programmingLanguages+i)->language);
-		free((programmingLanguages+i)->creator);
-		free((programmingLanguages+i)->paradigm);
+		free((programmingLanguages + i)->language);
+		free((programmingLanguages + i)->creator);
+		free((programmingLanguages + i)->paradigm);
+		free(programmingLanguages + i);
 	}
 	free(programmingLanguages);
-	}
+	//free(languageMeta);
 
-	if(osMeta.count>0){
-	for(int i = 0; i < osMeta.maxCount; i++)
+	for(int i; i < osMeta.maxCount; i++)
 	{
-		free((operatingSystems+i)->name);
-		free((operatingSystems+i)->developer);
-		free((operatingSystems+i)->kernelType);
+		free((operatingSystems + i)->name);
+		free((operatingSystems + i)->developer);
+		free((operatingSystems + i)->kernelType);
+		free(operatingSystems + i);
 	}
 	free(operatingSystems);
-	}
+	//free(osMeta);
 
-	if(dbMeta.count>0){
-	for(int i = 0; i < dbMeta.maxCount; i++)
+	for(int i; i < dbMeta.maxCount; i++)
 	{
-		free((databases+i)->name);
-		free((databases+i)->type);
-		free((databases+i)->developer);
+		free((databases + i)->name);
+		free((databases + i)->type);
+		free((databases + i)->developer);
+		free(databases + i);
 	}
 	free(databases);
-	}	
-	exit(0);
+	//free(dbMeta);
 
+	
 }
 
 // this code is responsible for parsing the user's
