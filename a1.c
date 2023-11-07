@@ -190,7 +190,6 @@ void insert(char** args) {
 		dbMeta.nextIndex++; 
 	}
 	else {  printf("%s","no match.\n"); return;}
-	free(table);
 	printf("insert complete\n");
 }
 
@@ -315,7 +314,6 @@ if(strcmp(table, "programmingLanguages")  ==  0){
 
 	}
 	else {  printf("%s","no match.\n"); return;}
-	free(table);
 	printf("modify complete\n");
 }
 
