@@ -111,18 +111,18 @@ void splitInput(char* input, char** args, int* arg_count) {
 void setup(char* table, int numRows) {
 
 	if(strcmp(table, "programmingLanguages")  ==  0){
-		programmingLanguages = calloc(numRows, sizeof(language_t));
+		programmingLanguages = malloc(numRows*sizeof(language_t));
 		languageMeta.maxCount = numRows;
 
 	}
 
 	else if(strcmp(table, "operatingSystems") == 0 ){
-		operatingSystems = calloc(numRows, sizeof(os_t));
+		operatingSystems = malloc(numRows*sizeof(os_t));
 		osMeta.maxCount = numRows;
 	}
 	
 	else if(strcmp(table, "databases") ==0){ 
-		databases = calloc(numRows, sizeof(db_t));
+		databases = malloc(numRows*sizeof(db_t));
 		dbMeta.maxCount = numRows;
 	}
 	else { return;}
