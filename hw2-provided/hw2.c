@@ -51,13 +51,13 @@ void advancedBitwiseFizzBuzz(int32_t N) {
 	// 11 10 9 8 7 6 5 4 3 2 1 0   <=== indices'
     for(int i = 0; i < MAX_BIT_POSITION; i++)
     {
-        if((N >>(MAX_BIT_POSITION-1-i))&0xFF)
+        //printf("%d\n",(N >>(MAX_BIT_POSITION-1-i)));
+        if((N >>(MAX_BIT_POSITION-1-i))&1)
         {
             char c = *(getFizzBuzzForBit(i));
-            printf("%c",c);
+           printf("%c",c);
         }
         else{printf("%d",0);}
-
         if(((i+1)%4==0)&&(i!=0)){printf(" ");}
     }
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     // Check if the number is within the range of a 32-bit signed integer
 	// If so, print "Number out of range for a 32-bit integer\n"
 
-    printf("%s\n", argv[1]);
+    //printf("%s\n", argv[1]);
     char *remaining;
     long l = strtol(argv[1], &remaining, 10); 
     if(l>INT_MAX||l<INT_MIN){
